@@ -9,4 +9,3 @@ const Projects = () => {
 }
 
 export default Projects
-projects
