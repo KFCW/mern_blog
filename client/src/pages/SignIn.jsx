@@ -3,7 +3,7 @@ import {Alert, Button, Label, Spinner, TextInput} from "flowbite-react"
 import { useState} from "react"
 import { signInFailure, signInStart, signInSuccess } from "../../redux/user/userSlice"
 import {useDispatch, useSelector} from "react-redux"
-
+import OAuth from "../components/OAuth"
 
 const SignIn = () => {  
   const [formData, setFormData] = useState({});
@@ -75,6 +75,7 @@ const SignIn = () => {
                       ): "Se connecter"
                     }
                 </Button>
+                <OAuth/>
             </form>
             <div className="flex gap-2 text-sm mt-5">
               <span>Pas encore un compte?</span>
