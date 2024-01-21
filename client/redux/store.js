@@ -1,12 +1,14 @@
 // Importation des fonctions nécessaires depuis les bibliothèques Redux Toolkit et redux-persist
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import userSlice from './user/userSlice';
+import themeSlice from './theme/themeSlice';
 import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 
 // Combinaison des slices de réducteur pour créer le réducteur racine
 const rootReducer = combineReducers({
-    user: userSlice
+    user: userSlice,
+    theme: themeSlice
 });
 
 // Configuration pour la persistance de l'état avec redux-persist
