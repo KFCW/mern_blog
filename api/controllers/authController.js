@@ -1,33 +1,87 @@
 const User = require("../models/userModel")
 const bcryptjs = require("bcryptjs")
 const {errorHandler} = require("../utils/error")
+const jwt = require("jsonwebtoken")
+
 
 const signup = async (req, res, next) => {
-    const {username, email , password} = req.body;
-
-    if(!username || !email || !password || username === '' || email === '' || password === ''){
-        next(errorHandler(400, "Veuillez remplir tous les champs!"))
+    const { username, email, password } = req.body;
+  
+    // Vérification des champs requis
+    if (!username || !email || !password || username === '' || email === '' || password === '') {
+      return next(errorHandler(400, "Veuillez remplir tous les champs!"));
     }
-
-
-    
-    const hashPassword =  bcryptjs.hashSync(password, 10);
-
+  
+    // Hachage du mot de passe
+    const hashPassword = bcryptjs.hashSync(password, 10);
+  
+    // Création d'un nouvel utilisateur avec le mot de passe haché
     const newUser = new User({
-        username,
-        email,
-        password : hashPassword 
-    })
+      username,
+      email,
+      password: hashPassword,
+    });
+  
     try {
-        await newUser.save();
-        res.status(201).json({message : "User enregisré avec succès !"})
-    }catch(e) {
-        next(e)
+      // Sauvegarde du nouvel utilisateur dans la base de données
+      await newUser.save();
+      
+      // Réponse au client indiquant que l'utilisateur a été enregistré avec succès
+      res.status(201).json({ message: "Utilisateur enregistré avec succès!" });
+    } catch (e) {
+      // Si une erreur se produit pendant le processus, renvoie l'erreur au gestionnaire d'erreurs global
+      next(e);
     }
-}
+  };
+  
+
+const signin = async (req, res, next) => {
+    const { email, password } = req.body;
+  
+    // Vérification des champs requis
+    if (!email || !password || email === "" || password === "") {
+      return next(errorHandler(400, "Veuillez remplir tous les champs!"));
+    }
+  
+    try {
+      // Recherche de l'utilisateur dans la base de données par son adresse e-mail
+      const validUser = await User.findOne({ email });
+  
+      // Si l'utilisateur n'est pas trouvé, renvoie une erreur 404
+      if (!validUser) {
+        return next(errorHandler(404, "Utilisateur inexistant"));
+      }
+  
+      // Vérification du mot de passe
+      const validPassword = bcryptjs.compareSync(password, validUser.password);
+  
+      // Si le mot de passe n'est pas valide, renvoie une erreur 400
+      if (!validPassword) {
+        return next(errorHandler(400, "Mot de passe incorrect!"));
+      }
+  
+      // Génération du jeton JWT
+      const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET);
+  
+     // Destructuring de validUser._doc: extraction de la propriété 'password' renommée en 'pass' et capture du reste des propriétés dans 'rest'
+      const { password: pass, ...rest  } = validUser._doc;
+
+      
+      // Envoi de la réponse au client avec le jeton JWT inclus dans un cookie
+      res.status(200)
+        .cookie('access_token', token, { httpOnly: true })
+        .json({ rest });
+
+  
+    } catch (e) {
+      // Si une erreur se produit pendant le processus, renvoie l'erreur au gestionnaire d'erreurs global
+      next(e);
+    }
+  };
+  
 
 
 
 
 
-module.exports = {signup}
+module.exports = {signup, signin}

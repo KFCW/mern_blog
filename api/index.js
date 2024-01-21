@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoute")
 const authRoutes = require("./routes/authRoute")
+
 //Configuration des variables d'env
 dotenv.config()
 
